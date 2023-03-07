@@ -52,8 +52,9 @@ func TestReplayWorker(t *testing.T) {
 		},
 	}
 	jobCron, _ := cron.ParseCronSchedule(jobCronStr)
-	replayConfig := scheduler.NewReplayConfig(startTime, endTime, false, replayDescription)
-	replayConfigParallel := scheduler.NewReplayConfig(startTime, endTime, true, replayDescription)
+	replayJobConfig := map[string]string{"EXECUTION_PROJECT": "example_project"}
+	replayConfig := scheduler.NewReplayConfig(startTime, endTime, false, replayJobConfig, replayDescription)
+	replayConfigParallel := scheduler.NewReplayConfig(startTime, endTime, true, replayJobConfig, replayDescription)
 	replayServerConfig := config.ReplayConfig{}
 
 	t.Run("Process", func(t *testing.T) {
