@@ -26,7 +26,8 @@ type createCommand struct {
 	logger         log.Logger
 	configFilePath string
 
-	parallel bool
+	parallel  bool
+	jobConfig string
 
 	projectName   string
 	namespaceName string
@@ -68,6 +69,7 @@ func (r *createCommand) injectFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVarP(&r.namespaceName, "namespace-name", "n", "", "Name of the optimus namespace")
 
 	cmd.Flags().BoolVarP(&r.parallel, "parallel", "", false, "backfill job runs in parallel")
+	cmd.Flags().StringVarP(&r.jobConfig, "job-config", "", "", "additional job configurations")
 
 	// Mandatory flags if config is not set
 	cmd.Flags().StringVarP(&r.projectName, "project-name", "p", "", "Name of the optimus project")
@@ -102,7 +104,7 @@ func (r *createCommand) RunE(_ *cobra.Command, args []string) error {
 		endTime = args[2]
 	}
 
-	replayID, err := r.createReplayRequest(jobName, startTime, endTime)
+	replayID, err := r.createReplayRequest(jobName, startTime, endTime, r.jobConfig)
 	if err != nil {
 		return err
 	}
@@ -110,7 +112,7 @@ func (r *createCommand) RunE(_ *cobra.Command, args []string) error {
 	return nil
 }
 
-func (r *createCommand) createReplayRequest(jobName, startTimeStr, endTimeStr string) (string, error) {
+func (r *createCommand) createReplayRequest(jobName, startTimeStr, endTimeStr, jobConfig string) (string, error) {
 	conn, err := connectivity.NewConnectivity(r.host, replayTimeout)
 	if err != nil {
 		return "", err
@@ -134,6 +136,7 @@ func (r *createCommand) createReplayRequest(jobName, startTimeStr, endTimeStr st
 		StartTime:     startTime,
 		EndTime:       endTime,
 		Parallel:      r.parallel,
+		JobConfig:     jobConfig,
 		Description:   "",
 	})
 	if err != nil {
